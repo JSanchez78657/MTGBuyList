@@ -27,10 +27,12 @@ def get_sets(name):
 def get_list(names):
     card_list = collections.defaultdict(list)
     for name in names:
-        print(name + '...')
+        # print(name + '...')
         if name not in common_cards:
-            card_list[name].append(get_sets(name))
-        print(' done!')
+            card = get_sets(name)
+            if card is not None:
+                card_list[name].append(card)
+        # print(' done!')
         time.sleep(0.1)
     return card_list
 
