@@ -1,4 +1,5 @@
 import collections
+import string
 import time
 import requests
 import pprint
@@ -48,7 +49,7 @@ def clean_names(names):
     return names
 
 
-def get_list(raw):
+def get_list(raw, cur):
     card_list = collections.defaultdict(list)
     names = clean_names(raw.split('\r\n'))
     last_call = None
@@ -71,20 +72,42 @@ def paste(textbox):
 # pp.pprint(big_list)
 # print("Execution took %s seconds." % (time.time() - start))
 window = Tk()
+window.title('MTG Set Getter')
+window.resizable(width='False', height='False')
 root_frame = ttk.Frame(window, padding=10)
 root_frame.grid()
-card_textbox = Text(root_frame, width=40, height=10)
+card_textbox = Text(root_frame, width=40, height=25, wrap='none')
 card_textbox.grid(row=0, column=0)
-button_frame = ttk.Frame(root_frame)
-button_frame.grid(row=0, column=1)
-search_button = ttk.Button(
-    button_frame,
-    text="Search",
-    command=lambda: get_list(card_textbox.get('1.0', 'end-1c'))
+vertical_scrollbar = Scrollbar(root_frame, command=card_textbox.yview, orient='vertical')
+vertical_scrollbar.grid(row=0, column=1, sticky='ns')
+horizontal_scrollbar = Scrollbar(root_frame, command=card_textbox.xview, orient='horizontal')
+horizontal_scrollbar.grid(row=1, column=0, sticky='ew')
+card_textbox.configure(yscrollcommand=vertical_scrollbar.set)
+card_textbox.configure(xscrollcommand=horizontal_scrollbar.set)
+interaction_frame = ttk.Frame(root_frame)
+interaction_frame.grid(row=0, column=2)
+currency = IntVar()
+currency.set(1)
+usd_radiobutton = ttk.Radiobutton(
+    interaction_frame,
+    text='USD',
+    value=1,
+    variable=currency
 ).grid(row=0, column=0)
-clipboard_button = ttk.Button(
-    button_frame,
-    text="Copy from Clipboard",
-    command=lambda: paste(card_textbox)
+EUR_radiobutton = ttk.Radiobutton(
+    interaction_frame,
+    text='EUR',
+    value=2,
+    variable=currency
 ).grid(row=1, column=0)
+search_button = ttk.Button(
+    interaction_frame,
+    text='Search',
+    command=lambda: get_list(card_textbox.get('1.0', 'end-1c'), currency)
+).grid(row=2, column=0)
+clipboard_button = ttk.Button(
+    interaction_frame,
+    text='Clipboard',
+    command=lambda: paste(card_textbox)
+).grid(row=3, column=0)
 window.mainloop()
